@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Linux驱动框架写出完整的设备驱动程序需要如下几个步骤： 写出first_drv_open、first_drv_write、first_drv_read、和first_drv_ioctl等函数； 定义file_operations结构体并填充其成员函数first_drv_open、first_drv_write、first_drrv_read、和first_drv_ioctl等；（函数指针！！！">
+<meta property="og:type" content="website">
+<meta property="og:title" content="HEXO_wbs网站">
+<meta property="og:url" content="http://yoursite.com/HEXO-wbs%E7%BD%91%E7%AB%99.html">
+<meta property="og:site_name" content="wbsHexo个人博客">
+<meta property="og:description" content="Linux驱动框架写出完整的设备驱动程序需要如下几个步骤： 写出first_drv_open、first_drv_write、first_drv_read、和first_drv_ioctl等函数； 定义file_operations结构体并填充其成员函数first_drv_open、first_drv_write、first_drrv_read、和first_drv_ioctl等；（函数指针！！！">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-05-05T14:49:50.000Z">
+<meta property="article:modified_time" content="2020-05-06T10:52:54.062Z">
+<meta property="article:author" content="Abraham Wong">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yoursite.com/HEXO-wbs%E7%BD%91%E7%AB%99">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : false,
+    lang   : 'en'
+  };
+</script>
+
+  <title>HEXO_wbs网站 | wbsHexo个人博客
+</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">wbsHexo个人博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+  
+  
+
+          <div class="content page posts-expand">
+            
+
+    
+    
+    
+    <div class="post-block" lang="en">
+      <header class="post-header">
+
+<h1 class="post-title" itemprop="name headline">HEXO_wbs网站
+</h1>
+
+<div class="post-meta">
+  
+
+</div>
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+          <h2 id="Linux驱动框架"><a href="#Linux驱动框架" class="headerlink" title="Linux驱动框架"></a>Linux驱动框架</h2><h3 id="写出完整的设备驱动程序需要如下几个步骤："><a href="#写出完整的设备驱动程序需要如下几个步骤：" class="headerlink" title="写出完整的设备驱动程序需要如下几个步骤："></a>写出完整的设备驱动程序需要如下几个步骤：</h3><ol>
+<li>写出first_drv_open、first_drv_write、first_drv_read、和first_drv_ioctl等函数；</li>
+<li>定义file_operations结构体并填充其成员函数first_drv_open、first_drv_write、first_drrv_read、和first_drv_ioctl等；（函数指针！！！）</li>
+<li>模块加载函数，通过register_chrdev将字符设备注册到内核中；</li>
+<li>写驱动的入口函数；</li>
+<li>写驱动的出口函数；</li>
+<li>通过module_init()来修饰驱动入口函数；</li>
+<li>通过module_exit()来修饰驱动出口函数；</li>
+<li>声明模块许可证；</li>
+</ol>
+<p><strong><a id="more"></a>步骤一：在新创建的.c文件中编写代码</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/module.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/kernel.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/fs.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/init.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/delay.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;asm/hardware.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;asm/io.h&gt;</span></span></span><br><span class="line"><span class="comment">/*inode结构便是具体的文件，file结构体是文件描述符，其中包啊汗文件的一些状体啊信息*/</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">first_drv_open</span><span class="params">(struct inode *inode,struct file *file)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    printk(<span class="string">"first_drv_open\n"</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">ssize_t</span> <span class="title">first_drv_write</span><span class="params">(struct file *file,<span class="keyword">const</span> <span class="keyword">char</span> __user *buf,<span class="keyword">size_t</span> count,<span class="keyword">loff_t</span> *ppos)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    printk(<span class="string">"first_drv_write\n"</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*定义file_operations结构体来封装驱动函数open、write*/</span></span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">file_operations</span> <span class="title">first_drv_fops</span> = &#123;</span></span><br><span class="line">    .owener = THIS_MODULE, <span class="comment">//当设备正在被使用时组织模块被卸载</span></span><br><span class="line">    .<span class="built_in">open</span> = first_drv_open,</span><br><span class="line">    .<span class="built_in">write</span> = first_drv_write</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">/*写first_drv_init入口函数来调用register_chrdev()*/</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">first_dev_init</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">/*register_chrdev注册字符设备，并设置主设备号major=100,如果设置major为0，表示由内核动态分配主设备号，函数的返回值是主设备号*/</span></span><br><span class="line">    register_chrdev(<span class="number">100</span>,<span class="string">"first_drv"</span>,&amp;first_drv_fops);</span><br><span class="line">    <span class="comment">/*register_chrdev函数是在文件系统中找到字符设备，并通过主设备号找到它在内和数组里对应的位置，最后将设备名字和fops结构填充*/</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*first_drv_exit出口函数*/</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">first_drv_exit</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    unregister_chrdev(<span class="number">100</span>,<span class="string">"first_drv"</span>);<span class="comment">//卸载驱动</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*module_init修饰入口函数*/</span></span><br><span class="line">module_init(first_dev_init);</span><br><span class="line"><span class="comment">/*module_exit修饰出口函数*/</span></span><br><span class="line">module_exit(first_drv_exit);</span><br><span class="line"><span class="comment">/*许可证声明,描述内核模块的许可权限*/</span></span><br><span class="line">MODULE_LICENSE(<span class="string">"GPL v2"</span>);</span><br></pre></td></tr></table></figure>
+
+<p><strong>步骤二：编写makefile脚本</strong></p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">KERN_DIR = /work/system/linux-2.6.22.6 <span class="comment">#所依赖的内核目录，内核必须已编译好</span></span><br><span class="line"><span class="section">all:</span></span><br><span class="line">	make -C <span class="variable">$(KERN_DIR)</span> M=`pwd` modules</span><br><span class="line"><span class="section">clean:</span></span><br><span class="line">	make -C <span class="variable">$(KERN_DIR)</span> M=`pwd` modules clean</span><br><span class="line">	rm -rf modules.order</span><br><span class="line">obj-m 	+=first_drv.o</span><br></pre></td></tr></table></figure>
+
+<p><strong>步骤三：在对应目录中知行make命令，生成.ko模块文件</strong></p>
+<p><strong>步骤四：通过U盘或者nfs网络文件系统将该.ko文件加载到内核中</strong></p>
+<p><strong>步骤五：创建dev/first_driver设备节点</strong></p>
+<blockquote>
+<p>通过命令：</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mknod &#x2F;dev&#x2F;first_driver 100 0来创建设备节点</span><br></pre></td></tr></table></figure>
+
+<p><strong>步骤六：编写应用程序进行测试</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> fd1,fd2;</span><br><span class="line">    <span class="keyword">int</span> num = <span class="number">1</span>;</span><br><span class="line">    fd1 = <span class="built_in">open</span>(<span class="string">"dev/first_driver"</span>,O_RDWR);<span class="comment">//打开设备节点</span></span><br><span class="line">    <span class="keyword">if</span>(fd1&lt;<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"can't open%d!\n"</span>,fd1);     </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"can open%d!\n"</span>,fd1);<span class="comment">//成功打开，返回文件描述符</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">write</span>(fd1,&amp;num,<span class="number">4</span>); <span class="comment">//写入数值1</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>执行过程：用户空间的open()函数-&gt;文件系统的sys_open()函数-&gt;驱动的first_drv_open()函数</p>
+</blockquote>
+<p><strong>自动创建设备节点的机制</strong></p>
+<ol>
+<li><p>首先创建一个class类，然后再class类下，创建一个class_devic，即在类下面创建类的设备；</p>
+</li>
+<li><p>在驱动入口函数中添加步骤：</p>
+<p>firstdrv_class = class_create(THIS_MODULE,”first_drv”)</p>
+<p>firstdrv_class_devs = class_device_create(firstdrv_class ,NULL,MKDEV(major,0),NULL,”first_drv”)</p>
+</li>
+<li><p>在驱动出口函数中添加：</p>
+<p>class_device_unregister(firstdrv_class_devs );</p>
+<p>class_destroy(firstdrv_class );</p>
+</li>
+</ol>
+<p>这个自动创建设备节点的功能是基于Linux支持的热插拔功能，</p>
+
+      </div>
+      
+      
+      
+    </div>
+    
+
+    
+    
+    
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux驱动框架"><span class="nav-number">1.</span> <span class="nav-text">Linux驱动框架</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#写出完整的设备驱动程序需要如下几个步骤："><span class="nav-number">1.1.</span> <span class="nav-text">写出完整的设备驱动程序需要如下几个步骤：</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Abraham Wong</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Abraham Wong</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
