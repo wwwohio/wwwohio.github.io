@@ -1,56 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>HEXO_wbs网站</title>
-    <url>/2020/05/05/HEXO-wbs%E7%BD%91%E7%AB%99/</url>
-    <content><![CDATA[<h2 id="Linux驱动框架"><a href="#Linux驱动框架" class="headerlink" title="Linux驱动框架"></a>Linux驱动框架</h2><h3 id="写出完整的设备驱动程序需要如下几个步骤："><a href="#写出完整的设备驱动程序需要如下几个步骤：" class="headerlink" title="写出完整的设备驱动程序需要如下几个步骤："></a>写出完整的设备驱动程序需要如下几个步骤：</h3>
-<ol>
-<li>写出first_drv_open、first_drv_write、first_drv_read、和first_drv_ioctl等函数；</li>
-<li>定义file_operations结构体并填充其成员函数first_drv_open、first_drv_write、first_drrv_read、和first_drv_ioctl等；（函数指针！！！）</li>
-<li>模块加载函数，通过register_chrdev将字符设备注册到内核中；</li>
-<li>写驱动的入口函数；</li>
-<li>写驱动的出口函数；</li>
-<li>通过module_init()来修饰驱动入口函数；</li>
-<li>通过module_exit()来修饰驱动出口函数；</li>
-<li>声明模块许可证；</li>
-</ol>
-<p><strong><a id="more"></a>步骤一：在新创建的.c文件中编写代码</strong></p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/module.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/kernel.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/fs.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/init.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/delay.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;asm/hardware.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;asm/io.h&gt;</span></span></span><br><span class="line"><span class="comment">/*inode结构便是具体的文件，file结构体是文件描述符，其中包啊汗文件的一些状体啊信息*/</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">first_drv_open</span><span class="params">(struct inode *inode,struct file *file)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    printk(<span class="string">"first_drv_open\n"</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">ssize_t</span> <span class="title">first_drv_write</span><span class="params">(struct file *file,<span class="keyword">const</span> <span class="keyword">char</span> __user *buf,<span class="keyword">size_t</span> count,<span class="keyword">loff_t</span> *ppos)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    printk(<span class="string">"first_drv_write\n"</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*定义file_operations结构体来封装驱动函数open、write*/</span></span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">file_operations</span> <span class="title">first_drv_fops</span> = &#123;</span></span><br><span class="line">    .owener = THIS_MODULE, <span class="comment">//当设备正在被使用时组织模块被卸载</span></span><br><span class="line">    .<span class="built_in">open</span> = first_drv_open,</span><br><span class="line">    .<span class="built_in">write</span> = first_drv_write</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">/*写first_drv_init入口函数来调用register_chrdev()*/</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">first_dev_init</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">/*register_chrdev注册字符设备，并设置主设备号major=100,如果设置major为0，表示由内核动态分配主设备号，函数的返回值是主设备号*/</span></span><br><span class="line">    register_chrdev(<span class="number">100</span>,<span class="string">"first_drv"</span>,&amp;first_drv_fops);</span><br><span class="line">    <span class="comment">/*register_chrdev函数是在文件系统中找到字符设备，并通过主设备号找到它在内和数组里对应的位置，最后将设备名字和fops结构填充*/</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*first_drv_exit出口函数*/</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">first_drv_exit</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    unregister_chrdev(<span class="number">100</span>,<span class="string">"first_drv"</span>);<span class="comment">//卸载驱动</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*module_init修饰入口函数*/</span></span><br><span class="line">module_init(first_dev_init);</span><br><span class="line"><span class="comment">/*module_exit修饰出口函数*/</span></span><br><span class="line">module_exit(first_drv_exit);</span><br><span class="line"><span class="comment">/*许可证声明,描述内核模块的许可权限*/</span></span><br><span class="line">MODULE_LICENSE(<span class="string">"GPL v2"</span>);</span><br></pre></td></tr></table></figure>
-
-<p><strong>步骤二：编写makefile脚本</strong></p>
-<figure class="highlight makefile"><table><tr><td class="code"><pre><span class="line">KERN_DIR = /work/system/linux-2.6.22.6 <span class="comment">#所依赖的内核目录，内核必须已编译好</span></span><br><span class="line"><span class="section">all:</span></span><br><span class="line">	make -C <span class="variable">$(KERN_DIR)</span> M=`pwd` modules</span><br><span class="line"><span class="section">clean:</span></span><br><span class="line">	make -C <span class="variable">$(KERN_DIR)</span> M=`pwd` modules clean</span><br><span class="line">	rm -rf modules.order</span><br><span class="line">obj-m 	+=first_drv.o</span><br></pre></td></tr></table></figure>
-
-<p><strong>步骤三：在对应目录中知行make命令，生成.ko模块文件</strong></p>
-<p><strong>步骤四：通过U盘或者nfs网络文件系统将该.ko文件加载到内核中</strong></p>
-<p><strong>步骤五：创建dev/first_driver设备节点</strong></p>
-<blockquote>
-<p>通过命令：</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mknod &#x2F;dev&#x2F;first_driver 100 0来创建设备节点</span><br></pre></td></tr></table></figure>
-
-<p><strong>步骤六：编写应用程序进行测试</strong></p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> fd1,fd2;</span><br><span class="line">    <span class="keyword">int</span> num = <span class="number">1</span>;</span><br><span class="line">    fd1 = <span class="built_in">open</span>(<span class="string">"dev/first_driver"</span>,O_RDWR);<span class="comment">//打开设备节点</span></span><br><span class="line">    <span class="keyword">if</span>(fd1&lt;<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"can't open%d!\n"</span>,fd1);     </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"can open%d!\n"</span>,fd1);<span class="comment">//成功打开，返回文件描述符</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">write</span>(fd1,&amp;num,<span class="number">4</span>); <span class="comment">//写入数值1</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>执行过程：用户空间的open()函数-&gt;文件系统的sys_open()函数-&gt;驱动的first_drv_open()函数</p>
-</blockquote>
-<p><strong>自动创建设备节点的机制</strong></p>
-<ol>
-<li><p>首先创建一个class类，然后再class类下，创建一个class_devic，即在类下面创建类的设备；</p>
-</li>
-<li><p>在驱动入口函数中添加步骤：</p>
-<p>firstdrv_class = class_create(THIS_MODULE,”first_drv”)</p>
-<p>firstdrv_class_devs = class_device_create(firstdrv_class ,NULL,MKDEV(major,0),NULL,”first_drv”)</p>
-</li>
-<li><p>在驱动出口函数中添加：</p>
-<p>class_device_unregister(firstdrv_class_devs );</p>
-<p>class_destroy(firstdrv_class );</p>
-</li>
-</ol>
-<p>这个自动创建设备节点的功能是基于Linux支持的热插拔功能，</p>
-]]></content>
-  </entry>
-  <entry>
     <title>Hello World</title>
     <url>/2020/05/05/hello-world/</url>
     <content><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
@@ -72,8 +22,8 @@
       </tags>
   </entry>
   <entry>
-    <title>一级标题</title>
-    <url>/2020/05/06/%E4%B8%80%E7%BA%A7%E6%A0%87%E9%A2%98/</url>
+    <title>一级标题 - 副本</title>
+    <url>/2020/05/07/%E4%B8%80%E7%BA%A7%E6%A0%87%E9%A2%98%20-%20%E5%89%AF%E6%9C%AC/</url>
     <content><![CDATA[<h1 id="一级标题"><a href="#一级标题" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题"><a href="#二级标题" class="headerlink" title="二级标题"></a>二级标题</h2><p>…</p>
 <h6 id="六级标题"><a href="#六级标题" class="headerlink" title="六级标题"></a>六级标题</h6><ul>
 <li>无序列表</li>
@@ -182,121 +132,58 @@
 ]]></content>
   </entry>
   <entry>
-    <title>postname</title>
-    <url>/2020/05/06/postname/</url>
-    <content><![CDATA[<h1 id="一级标题"><a href="#一级标题" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题"><a href="#二级标题" class="headerlink" title="二级标题"></a>二级标题</h2><p>…</p>
-<h6 id="六级标题"><a href="#六级标题" class="headerlink" title="六级标题"></a>六级标题</h6><ul>
-<li>无序列表</li>
-<li>无序列表</li>
-</ul>
+    <title>HEXO_wbs网站</title>
+    <url>/2020/05/05/HEXO-wbs%E7%BD%91%E7%AB%99/</url>
+    <content><![CDATA[<h2 id="Linux驱动框架"><a href="#Linux驱动框架" class="headerlink" title="Linux驱动框架"></a>Linux驱动框架</h2><h3 id="写出完整的设备驱动程序需要如下几个步骤："><a href="#写出完整的设备驱动程序需要如下几个步骤：" class="headerlink" title="写出完整的设备驱动程序需要如下几个步骤："></a>写出完整的设备驱动程序需要如下几个步骤：</h3>
 <ol>
-<li>有序列表</li>
-<li>有序列表<img src="/2020/05/06/postname/linux.jpg" class="" title="这是一个新的博客的图片的说明"></li>
+<li>写出first_drv_open、first_drv_write、first_drv_read、和first_drv_ioctl等函数；</li>
+<li>定义file_operations结构体并填充其成员函数first_drv_open、first_drv_write、first_drrv_read、和first_drv_ioctl等；（函数指针！！！）</li>
+<li>模块加载函数，通过register_chrdev将字符设备注册到内核中；</li>
+<li>写驱动的入口函数；</li>
+<li>写驱动的出口函数；</li>
+<li>通过module_init()来修饰驱动入口函数；</li>
+<li>通过module_exit()来修饰驱动出口函数；</li>
+<li>声明模块许可证；</li>
 </ol>
-<ul>
-<li>无序列表</li>
-<li>无需列表<a id="more"></a>
+<p><strong><a id="more"></a>步骤一：在新创建的.c文件中编写代码</strong></p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/module.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/kernel.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/fs.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/init.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/delay.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;asm/hardware.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;asm/io.h&gt;</span></span></span><br><span class="line"><span class="comment">/*inode结构便是具体的文件，file结构体是文件描述符，其中包啊汗文件的一些状体啊信息*/</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">first_drv_open</span><span class="params">(struct inode *inode,struct file *file)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    printk(<span class="string">"first_drv_open\n"</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">ssize_t</span> <span class="title">first_drv_write</span><span class="params">(struct file *file,<span class="keyword">const</span> <span class="keyword">char</span> __user *buf,<span class="keyword">size_t</span> count,<span class="keyword">loff_t</span> *ppos)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    printk(<span class="string">"first_drv_write\n"</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*定义file_operations结构体来封装驱动函数open、write*/</span></span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">file_operations</span> <span class="title">first_drv_fops</span> = &#123;</span></span><br><span class="line">    .owener = THIS_MODULE, <span class="comment">//当设备正在被使用时组织模块被卸载</span></span><br><span class="line">    .<span class="built_in">open</span> = first_drv_open,</span><br><span class="line">    .<span class="built_in">write</span> = first_drv_write</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">/*写first_drv_init入口函数来调用register_chrdev()*/</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">first_dev_init</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">/*register_chrdev注册字符设备，并设置主设备号major=100,如果设置major为0，表示由内核动态分配主设备号，函数的返回值是主设备号*/</span></span><br><span class="line">    register_chrdev(<span class="number">100</span>,<span class="string">"first_drv"</span>,&amp;first_drv_fops);</span><br><span class="line">    <span class="comment">/*register_chrdev函数是在文件系统中找到字符设备，并通过主设备号找到它在内和数组里对应的位置，最后将设备名字和fops结构填充*/</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*first_drv_exit出口函数*/</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">first_drv_exit</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    unregister_chrdev(<span class="number">100</span>,<span class="string">"first_drv"</span>);<span class="comment">//卸载驱动</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*module_init修饰入口函数*/</span></span><br><span class="line">module_init(first_dev_init);</span><br><span class="line"><span class="comment">/*module_exit修饰出口函数*/</span></span><br><span class="line">module_exit(first_drv_exit);</span><br><span class="line"><span class="comment">/*许可证声明,描述内核模块的许可权限*/</span></span><br><span class="line">MODULE_LICENSE(<span class="string">"GPL v2"</span>);</span><br></pre></td></tr></table></figure>
+
+<p><strong>步骤二：编写makefile脚本</strong></p>
+<figure class="highlight makefile"><table><tr><td class="code"><pre><span class="line">KERN_DIR = /work/system/linux-2.6.22.6 <span class="comment">#所依赖的内核目录，内核必须已编译好</span></span><br><span class="line"><span class="section">all:</span></span><br><span class="line">	make -C <span class="variable">$(KERN_DIR)</span> M=`pwd` modules</span><br><span class="line"><span class="section">clean:</span></span><br><span class="line">	make -C <span class="variable">$(KERN_DIR)</span> M=`pwd` modules clean</span><br><span class="line">	rm -rf modules.order</span><br><span class="line">obj-m 	+=first_drv.o</span><br></pre></td></tr></table></figure>
+
+<p><strong>步骤三：在对应目录中知行make命令，生成.ko模块文件</strong></p>
+<p><strong>步骤四：通过U盘或者nfs网络文件系统将该.ko文件加载到内核中</strong></p>
+<p><strong>步骤五：创建dev/first_driver设备节点</strong></p>
 <blockquote>
-<p>引用</p>
+<p>通过命令：</p>
 </blockquote>
-</li>
-</ul>
-<p><a href="www.google.com">链接</a></p>
-<p><strong>粗体</strong></p>
-<p><em>斜体</em></p>
-<table>
-<thead>
-<tr>
-<th>表格</th>
-<th>表格</th>
-<th>表格</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>1</td>
-<td>2</td>
-<td>3</td>
-</tr>
-<tr>
-<td><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">代码</span><br><span class="line">代码</span><br></pre></td></tr></table></figure></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>***</td>
-<td></td>
-<td></td>
-</tr>
-</tbody></table>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mknod &#x2F;dev&#x2F;first_driver 100 0来创建设备节点</span><br></pre></td></tr></table></figure>
+
+<p><strong>步骤六：编写应用程序进行测试</strong></p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> fd1,fd2;</span><br><span class="line">    <span class="keyword">int</span> num = <span class="number">1</span>;</span><br><span class="line">    fd1 = <span class="built_in">open</span>(<span class="string">"dev/first_driver"</span>,O_RDWR);<span class="comment">//打开设备节点</span></span><br><span class="line">    <span class="keyword">if</span>(fd1&lt;<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"can't open%d!\n"</span>,fd1);     </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"can open%d!\n"</span>,fd1);<span class="comment">//成功打开，返回文件描述符</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">write</span>(fd1,&amp;num,<span class="number">4</span>); <span class="comment">//写入数值1</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>执行过程：用户空间的open()函数-&gt;文件系统的sys_open()函数-&gt;驱动的first_drv_open()函数</p>
+</blockquote>
+<p><strong>自动创建设备节点的机制</strong></p>
 <ol>
-<li>NAS本体</li>
-<li>硬盘</li>
-<li>电费</li>
-</ol>
-<ul>
-<li><p>NAS系统安装</p>
+<li><p>首先创建一个class类，然后再class类下，创建一个class_devic，即在类下面创建类的设备；</p>
 </li>
-<li><p>存储空间</p>
+<li><p>在驱动入口函数中添加步骤：</p>
+<p>firstdrv_class = class_create(THIS_MODULE,”first_drv”)</p>
+<p>firstdrv_class_devs = class_device_create(firstdrv_class ,NULL,MKDEV(major,0),NULL,”first_drv”)</p>
 </li>
-<li><p>文件格式</p>
-</li>
-<li><p>共享文件夹</p>
-</li>
-<li><p>用户管理</p>
-</li>
-<li><p>权限设置</p>
-</li>
-<li><p>常用协议</p>
-</li>
-<li><p>外网访问 公网IP 动态域名  证书申请 端口映射</p>
-</li>
-<li><p>内网穿透</p>
-<h3 id="家庭网络方案"><a href="#家庭网络方案" class="headerlink" title="家庭网络方案"></a>家庭网络方案</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1. 纯光猫方案  光猫拨号</span><br><span class="line"></span><br><span class="line">2. 单路由方案 路由拨号</span><br><span class="line"></span><br><span class="line">   外网连接类型</span><br><span class="line"></span><br><span class="line">   1. IPoE静态IP</span><br><span class="line">   2. IPoE动态IP</span><br><span class="line">   3. PPPoE 拨号</span><br><span class="line">   4. PPTP :VPN</span><br><span class="line">   5. L2TP: VPN</span><br><span class="line"></span><br><span class="line">3. 多路由方案</span><br><span class="line"></span><br><span class="line">4. AC+AP方案</span><br><span class="line"></span><br><span class="line">5. MESH 类似无线桥接</span><br><span class="line"></span><br><span class="line">6. 中继器、电力猫</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<hr>
-<ol>
-<li><p>成品NAS</p>
-</li>
-<li><p>家用微服务器整机方案</p>
-<ul>
-<li>免费开源NAS系统</li>
-<li>黑化NAS系统</li>
-</ul>
-</li>
-<li><p>DIY自组建NAS方案  NAS主机</p>
-<p>   freeNAS</p>
-</li>
-<li><p>猫盘  蜗牛星际  NAS主机</p>
-</li>
-<li><p>利用路由器扩展NAS方案</p>
+<li><p>在驱动出口函数中添加：</p>
+<p>class_device_unregister(firstdrv_class_devs );</p>
+<p>class_destroy(firstdrv_class );</p>
 </li>
 </ol>
-<hr>
-<p>路由器刷固件</p>
-<ul>
-<li><p>uboot</p>
-</li>
-<li><p>breed</p>
-</li>
-<li><p>CFE</p>
-</li>
-<li><p>RedBoot</p>
-</li>
-</ul>
-<ol>
-<li>电话线入户</li>
-<li>光纤入户</li>
-<li>网线入户</li>
-</ol>
+<p>这个自动创建设备节点的功能是基于Linux支持的热插拔功能，</p>
 ]]></content>
-      <tags>
-        <tag>markdown</tag>
-      </tags>
   </entry>
   <entry>
-    <title>一级标题 - 副本</title>
-    <url>/2020/05/07/%E4%B8%80%E7%BA%A7%E6%A0%87%E9%A2%98%20-%20%E5%89%AF%E6%9C%AC/</url>
+    <title>一级标题</title>
+    <url>/2020/05/06/%E4%B8%80%E7%BA%A7%E6%A0%87%E9%A2%98/</url>
     <content><![CDATA[<h1 id="一级标题"><a href="#一级标题" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题"><a href="#二级标题" class="headerlink" title="二级标题"></a>二级标题</h2><p>…</p>
 <h6 id="六级标题"><a href="#六级标题" class="headerlink" title="六级标题"></a>六级标题</h6><ul>
 <li>无序列表</li>
